@@ -1,6 +1,6 @@
 class Player
     attr_reader :name
-    attr_accessor :is_cp, :cards, :target
+    attr_accessor :is_cp, :cards, :target, :rank
 
     def initialize(name, is_cp)
         @name = name

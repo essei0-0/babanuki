@@ -59,46 +59,88 @@ class Game
     end
 
     def start()
-        turn = 1
-        winners = []
+        #手持ちのペアカードを捨てる処理
+        @shuffled_players.each do |player|
+            p '################'
+            player.cards.each_with_index do |card, i|     
+                p '-----------'  
+                p card.number
+                next if card.place == 'table'
 
-        while winners.length < 3 do
-            puts "#{turn}ターン目"
-            @shuffled_players.map do |player|
-                @shuffled_players.each do |test|
-                    puts test.cards.length
+                card_num_array = player.cards[(i+1)..-1].map(&:number)
+                p card_num_array
+                if pear_index = card_num_array.find_index(card.number)
+                    p pear_index
+                    card.place = 'table'
+                    player.cards[i + pear_index].place = 'table'
                 end
+
+            end
+        end
+
+        turn = 1
+        remaining_player = 4
+        @shuffled_players.map{|player| player.rank = 4}
+
+        while remaining_player > 1 do
+            puts "#{turn}ターン目"
+            @shuffled_players.each_with_index do |player, i|
+                puts"ランキング:#{player.rank}"
+                next if player.rank < 4
+
                 active_player = player
                 passive_player = player.target
+                # puts "ターゲット：#{active_player.target}"
 
                 puts "#{active_player.name}さんの番です。"
-                puts "#{passive_player.name}さんのカードを一枚引いてください"
+                if !active_player.is_cp
+                    puts "現在の手札はこちらです"
+                    puts active_player.check_cards
+                end
 
+                puts "#{passive_player.name}さんのカードを一枚引いてください"
                 # 次のひとのカードを引く処理
                 passive_player_cards_num = passive_player.cards.length
-                array = Array.new(passive_player_cards_num){'*'}
+                array = Array.new(passive_player_cards_num){'#'}
                 print array
                 puts "左から何番目のカードを引きますか?(1~#{passive_player_cards_num}):" 
-                draw_num = $stdin.gets.to_i
 
-                p draw_card = passive_player.cards[draw_num-1]
+                if active_player.is_cp
+                    draw_num = rand(1..passive_player_cards_num)
+                    puts "#{active_player.name}さんは#{draw_num}番目のカードを引きました。"
+                else 
+                    draw_num = $stdin.gets.to_i
 
-                passive_player.cards.delete_at(draw_num-1)
+                    #標準入力が指定した範囲でない場合のエラー処理
+                    while !(1..passive_player_cards_num).include?(draw_num)
+                        puts "1~#{passive_player_cards_num}の数字を入力してください"
+                        draw_num = $stdin.gets.to_i
+                    end
+                end
+
+                draw_card = passive_player.cards[draw_num-1]
+                passive_player.cards.delete(draw_card)
                 # カードを引かれた人の手持ちが0かどうかを判定する処理
                 if passive_player.cards.length == 0
-                    winners << passive_player
+                    remaining_player -= 1
+                    passive_player.rank = 4 - remaining_player
+                    puts "rank"
+                    puts 4 - remaining_player
                     active_player.target = passive_player.target
                 end
 
                 # 引いたカードと同じカードがあるか判定する処理
-                
                 if pear_index = active_player.cards.map(&:number).index(draw_card.number)
                     # 引いたカードと手札のカードのペアを捨てる処理
                     active_player.cards.delete_at(pear_index)
 
                     # カードを引いた人の手持ちが0かどうか判定する処理
                     if active_player.cards.length == 0
-                        winners << active_player
+                        remaining_player -= 1
+                        active_player.rank = 4 - remaining_player
+                        puts "rank"
+                        puts 4 - remaining_player
+                        @shuffled_players[i-1].target = passive_player
                     end
                 else
                     # 引いたカードを手札に加える処理
@@ -109,7 +151,11 @@ class Game
         end
         
         # 順位を表示
-        puts winners
+        ranked_players = @shuffled_players.sort_by(&:rank)
+        puts "-------ランキング-------"
+        ranked_players.each do |player|
+            puts "#{player.rank}位：#{player.name}"
+        end
     end
 
     def rule()
