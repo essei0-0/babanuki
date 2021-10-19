@@ -1,49 +1,55 @@
 class Game
-
-    def welcome()
+    attr_accessor :second
+    def initialize
+        @second = 1.5
+    end
+    def welcome
         while true
-            content = ['1.ゲームをはじめる', '2.ルールをみる']
+            content = ['1.ゲームをはじめる', '2.ルールをみる', '3.設定']
             display_as_heading(content)
             start_input = $stdin.gets.chomp!
 
-            if start_input == '1'
+            case start_input
+            when '1' then
                 puts "1.ゲームをはじめる"
-                self.prepare()
+                self.prepare
                 break
-            elsif start_input == '2'
+            when '2' then
                 puts "2.ルールをみる"
-                self.rule()
+                self.rule
+            when '3' then
+                puts "3.設定"
+                self.setting
             else
                 puts "もう一度入力してください。"
             end
         end
     end
 
-    def prepare()
+    def prepare
         create_players
-        display_players
-        distribute_cards
-        display_my_cards
+        delay_processing(display_players, @second)
+        delay_processing(distribute_cards, @second)
+        delay_processing((puts "カードを配りました。"), @second)
+        delay_processing(display_my_cards, @second)
 
         puts ""
-        puts "順番を決めています。"
+        delay_processing((puts "順番を決めています。"), @second)
         puts ""
 
         decide_play_order
-
-        puts "順番が決まりました。"
+        
+        delay_processing((puts "順番が決まりました。"), @second)
         puts ""
 
-        display_play_order
-
-        sleep(1)
+        display_as_heading("順番")
+        delay_processing(display_play_order, @second)
     end
 
-    def start()
+    def start
         puts ""
         puts "ペアのカードを捨てています。"
-        discard_pair_cards
-        #sleep(1)
+        delay_processing(discard_pair_cards, @second)
 
         #ターン数
         turn = 1
@@ -55,12 +61,10 @@ class Game
 
         confirm_before_start
 
-        display_as_heading("Game Start!")
-        sleep(1)
-
+        delay_processing(display_as_heading("Game Start!"), @second)
         
         while @remaining_player > 1 do
-            display_as_heading("#{turn}ターン目")
+            delay_processing(display_as_heading("#{turn}ターン目"), @second)
 
             @shuffled_players.each_with_index do |player, i|
                 next if player.rank < 4
@@ -68,7 +72,7 @@ class Game
                 active_player = player
                 passive_player = player.target
                 puts ""
-                puts "#{active_player.name}さんの番です。"
+                delay_processing((puts "#{active_player.name}さんの番です。"), @second)
 
                 if !active_player.is_cp
                     puts "現在の手札はこちらです"
@@ -76,12 +80,9 @@ class Game
                     puts active_player.check_cards
                 end
 
-                #sleep(1)
-
                 puts ""
                 draw_card = move_card(passive_player, active_player)
 
-                #sleep(1)
                 # カードを引かれた人の手持ちが0かどうかを判定する処理
                 if passive_player.cards.length == 0
                     @remaining_player -= 1
@@ -107,17 +108,45 @@ class Game
             end
             turn += 1
         end       
-        display_ranking
+        delay_processing(display_ranking, @second)
     end
 
-    def rule()
+    def rule
         content = ['こちらを参照してください。', 'https://www.card-asobi.com/babanuki.html']
         display_as_heading(content)
     end
 
+    def setting
+        display_as_heading("設定")
+        while true
+            speed_lists = ["1.ゆっくり", "2.ふつう（デフォルト）", "3.はやい", "9.デバッグモード"]
+            puts "出力のスピードを選択してください（数字で入力）"
+            puts speed_lists
+            speed = $stdin.gets.chomp!
+
+            case speed
+            when '1' then
+                self.second = 2
+                break
+            when '2' then
+                self.second = 1.5
+                break
+            when '3' then
+                self.second = 1
+                break
+            when '9' then
+                self.second = 0
+                break
+            else
+                puts "無効な値です。もう一度入力してください。"
+                
+            end
+        end
+    end
 
 
-    def end()
+
+    def end
         display_as_heading("thank you!!")
     end
 
@@ -148,7 +177,7 @@ class Game
         cards = Trump.new()
 
         #トランプカードをシャッフルする。
-        shuffled_cards = cards.shuffled()
+        shuffled_cards = cards.shuffled
         # p shuffled_cards
 
         #トランプカードを配る
@@ -157,7 +186,6 @@ class Game
         shuffled_cards.each_with_index do |card, i|
             @players[i%4].get_card(card)
         end
-        puts "カードを配りました。"
     end
 
     #自分の手札を表示する処理
@@ -208,17 +236,17 @@ class Game
 
     #from_playerからto_playerへカードを移動させる処理
     def move_card(from_player, to_player)
-        puts "#{from_player.name}さんのカードを一枚引いてください"
+        delay_processing((puts "#{from_player.name}さんのカードを一枚引いてください"), @second)
         # 次のひとのカードを引く処理
         from_player_cards_num = from_player.cards.length
         array = Array.new(from_player_cards_num){'#'}
         puts ""
-        print array
-        puts "左から何番目のカードを引きますか?(1~#{from_player_cards_num}):" 
+        delay_processing((print "#{array}\n"), @second)
+        delay_processing((puts "左から何番目のカードを引きますか?(1~#{from_player_cards_num}):"), @second)
 
         if to_player.is_cp
             draw_num = rand(1..from_player_cards_num)
-            puts "#{to_player.name}さんは#{draw_num}番目のカードを引きました。"
+            delay_processing((puts "#{to_player.name}さんは#{draw_num}番目のカードを引きました。"), @second)
         else 
             draw_num = $stdin.gets.to_i
 
@@ -238,7 +266,7 @@ class Game
     def display_ranking
         ranked_players = @shuffled_players.sort_by(&:rank)
         display_as_heading('ランキング')
-        
+
         ranked_players.each do |player|
             puts "#{player.rank}位：#{player.name}"
         end
@@ -265,5 +293,12 @@ class Game
         puts content
         puts "##############################"
         puts "" 
+    end
+
+    def delay_processing(cmd,second)
+        start_time = Time.now()
+        cmd
+        processing_time = Time.now - start_time
+        sleep(second - processing_time) if (second > processing_time)
     end
 end
