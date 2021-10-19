@@ -24,9 +24,9 @@ class Game
 
     def prepare()
         # 人数を決める(とりあえず4人で)
-        player = Player.new("狐火", false)
+        player = Player.new("P1", false)
 
-        cp_names = ['輪入道', '空也MC', 'DJなおや']
+        cp_names = ['com1', 'com2', 'com3']
         cps = Player.create_cps(cp_names)
 
         @players = [player] + cps
