@@ -32,7 +32,7 @@ class Game
         @players = [player] + cps
         
         puts ""
-        sleep(1)
+        #sleep(1)
         puts "##############################"
         puts "対戦相手はこちらです。"
         @players.each do |player|
@@ -53,12 +53,12 @@ class Game
         shuffled_cards.each_with_index do |card, i|
             @players[i%4].get_card(card)
         end
-        sleep(1)
+        #sleep(1)
         #手札確認
         puts "カードを配りました。"
-        sleep(1)
+        #sleep(1)
         puts "あなた(#{@players[0].name})の手札はこちらです。"
-        sleep(1)
+        #sleep(1)
         puts ""
         puts @players[0].check_cards
         
@@ -78,7 +78,7 @@ class Game
             @shuffled_players[i].target = @shuffled_players[(i+1)%4]
             # puts("#{@shuffled_players[i].name} : #{@shuffled_players[i].target.name}")
         end
-        sleep(1)
+        #sleep(1)
     end
 
     def start()
@@ -95,7 +95,7 @@ class Game
                 end
             end
         end
-        sleep(1)
+        #sleep(1)
 
         turn = 1
         remaining_player = 4
@@ -112,7 +112,7 @@ class Game
         puts "##############################"
         puts "Game Start!"
         puts "##############################"
-        sleep(1)
+        #sleep(1)
 
         while remaining_player > 1 do
             puts ""
@@ -126,17 +126,22 @@ class Game
                 active_player = player
                 passive_player = player.target
                 # puts "ターゲット：#{active_player.target}"
-
+                puts ""
                 puts "#{active_player.name}さんの番です。"
+
                 if !active_player.is_cp
                     puts "現在の手札はこちらです"
+                    puts ""
                     puts active_player.check_cards
                 end
+                #sleep(1)
 
+                puts ""
                 puts "#{passive_player.name}さんのカードを一枚引いてください"
                 # 次のひとのカードを引く処理
                 passive_player_cards_num = passive_player.cards.length
                 array = Array.new(passive_player_cards_num){'#'}
+                puts ""
                 print array
                 puts "左から何番目のカードを引きますか?(1~#{passive_player_cards_num}):" 
 
@@ -155,12 +160,11 @@ class Game
 
                 draw_card = passive_player.cards[draw_num-1]
                 passive_player.cards.delete(draw_card)
+                #sleep(1)
                 # カードを引かれた人の手持ちが0かどうかを判定する処理
                 if passive_player.cards.length == 0
                     remaining_player -= 1
                     passive_player.rank = 4 - remaining_player
-                    puts "rank"
-                    puts 4 - remaining_player
                     active_player.target = passive_player.target
                 end
 
@@ -173,8 +177,6 @@ class Game
                     if active_player.cards.length == 0
                         remaining_player -= 1
                         active_player.rank = 4 - remaining_player
-                        puts "rank"
-                        puts 4 - remaining_player
                         @shuffled_players[i-1].target = passive_player
                     end
                 else
@@ -187,19 +189,45 @@ class Game
         
         # 順位を表示
         ranked_players = @shuffled_players.sort_by(&:rank)
-        puts "-------ランキング-------"
+        puts ""
+        puts "##############################"  
+        puts "ランキング"
+        puts "##############################"  
         ranked_players.each do |player|
             puts "#{player.rank}位：#{player.name}"
+        end
+
+        player_rank = @players[0].rank
+
+        puts ""
+        puts "結果は#{@players[0].rank}位でした。"
+
+        case player_rank
+        when 1 then
+            puts "1位おめでとう!!"
+        when (2..3) then
+            puts "惜しい、、ナイスファイト！！"
+        when 4 then
+            puts "最下位だね、リベンジしよう！"
         end
     end
 
     def rule()
-        puts("ググってくれい")
+        puts ""
+        puts "##############################"       
+        puts "こちらを参照してください。"
+        puts "https://www.card-asobi.com/babanuki.html"
+        puts "##############################"  
     end
 
 
 
     def end()
+        puts ""
+        puts "##############################" 
         puts "thank you!!"
+        puts "##############################" 
     end
+
+    private
 end
