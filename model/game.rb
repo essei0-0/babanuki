@@ -2,11 +2,8 @@ class Game
 
     def welcome()
         while true
-            puts ""
-            puts "##############################"
-            puts "1.ゲームをはじめる"
-            puts "2.ルールをみる"
-            puts "################################"
+            content = ['1.ゲームをはじめる', '2.ルールをみる']
+            display_as_heading(content)
             start_input = $stdin.gets.chomp!
 
             if start_input == '1'
@@ -58,18 +55,12 @@ class Game
 
         confirm_before_start
 
-        puts ""
-        puts "##############################"
-        puts "Game Start!"
-        puts "##############################"
+        display_as_heading("Game Start!")
         sleep(1)
 
         
         while @remaining_player > 1 do
-            puts ""
-            puts "##############################"
-            puts "#{turn}ターン目"
-            puts "##############################"
+            display_as_heading("#{turn}ターン目")
 
             @shuffled_players.each_with_index do |player, i|
                 next if player.rank < 4
@@ -120,20 +111,14 @@ class Game
     end
 
     def rule()
-        puts ""
-        puts "##############################"       
-        puts "こちらを参照してください。"
-        puts "https://www.card-asobi.com/babanuki.html"
-        puts "##############################"  
+        content = ['こちらを参照してください。', 'https://www.card-asobi.com/babanuki.html']
+        display_as_heading(content)
     end
 
 
 
     def end()
-        puts ""
-        puts "##############################" 
-        puts "thank you!!"
-        puts "##############################" 
+        display_as_heading("thank you!!")
     end
 
 
@@ -151,13 +136,10 @@ class Game
 
     #プレイヤーの表示
     def display_players
-        puts ""
-        puts "##############################"
-        puts "対戦相手はこちらです。"
+        display_as_heading('対戦相手')
         @players.each do |player|
             player.is_cp ? (puts "cp    ：#{player.name}") : (puts "あなた：#{player.name}")
         end
-        puts "##############################"
     end
 
     #トランプカードを作成し、シャッフルと配布をする処理
@@ -255,10 +237,8 @@ class Game
     #順位を表示する処理
     def display_ranking
         ranked_players = @shuffled_players.sort_by(&:rank)
-        puts ""
-        puts "##############################"  
-        puts "ランキング"
-        puts "##############################"  
+        display_as_heading('ランキング')
+        
         ranked_players.each do |player|
             puts "#{player.rank}位：#{player.name}"
         end
@@ -276,5 +256,14 @@ class Game
         when 4 then
             puts "最下位だね、リベンジしよう！"
         end
+    end
+
+    #contentを見出しとして表示する。
+    def display_as_heading(content)
+        puts ""
+        puts "##############################"  
+        puts content
+        puts "##############################"
+        puts "" 
     end
 end
