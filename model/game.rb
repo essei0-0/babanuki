@@ -1,28 +1,44 @@
 class Game
-    attr_accessor :cp_num
-
-    # def initialize(cp_num)
-    #     @cp_num = cp_num
-    # end
-
 
     def welcome()
-        puts "1.ゲームをはじめる\n2.ルールをみる"
-        start_input = $stdin.gets
-        return start_input
+        while true
+            puts ""
+            puts "##############################"
+            puts "1.ゲームをはじめる"
+            puts "2.ルールをみる"
+            puts "################################"
+            start_input = $stdin.gets.chomp!
+
+            if start_input == '1'
+                puts "1.ゲームをはじめる"
+                self.prepare()
+                break
+            elsif start_input == '2'
+                puts "2.ルールをみる"
+                self.rule()
+            else
+                puts "もう一度入力してください。"
+            end
+        end
     end
 
     def prepare()
         # 人数を決める(とりあえず4人で)
         player = Player.new("狐火", false)
-        p player
 
         cp_names = ['輪入道', '空也MC', 'DJなおや']
         cps = Player.create_cps(cp_names)
-        p cps
 
         @players = [player] + cps
-        p @players
+        
+        puts ""
+        sleep(1)
+        puts "##############################"
+        puts "対戦相手はこちらです。"
+        @players.each do |player|
+            player.is_cp ? (puts "cp    ：#{player.name}") : (puts "あなた：#{player.name}")
+        end
+        puts "##############################"
 
         #トランプカードを生成する。
         cards = Trump.new()
@@ -32,60 +48,79 @@ class Game
         # p shuffled_cards
 
         #トランプカードを配る
-
+        puts ""
+        puts "カードを配ってます。"
         shuffled_cards.each_with_index do |card, i|
             @players[i%4].get_card(card)
         end
-
+        sleep(1)
         #手札確認
-        puts "準備が完了しました。"
-        puts "あなたの手札はこちらです。"
-        puts @players[0].name, @players[0].check_cards
-        puts "--------------------"
+        puts "カードを配りました。"
+        sleep(1)
+        puts "あなた(#{@players[0].name})の手札はこちらです。"
+        sleep(1)
+        puts ""
+        puts @players[0].check_cards
         
         # デバッグ用
-        puts @players[1].name, @players[1].check_cards
-        puts "--------------------"
-        puts @players[2].name, @players[2].check_cards
-        puts "--------------------"
-        puts @players[3].name, @players[3].check_cards
+        # puts @players[1].name, @players[1].check_cards
+        # puts "--------------------"
+        # puts @players[2].name, @players[2].check_cards
+        # puts "--------------------"
+        # puts @players[3].name, @players[3].check_cards
 
         #順番を決める
+        puts ""
+        puts "順番を決めています。"
+
         @shuffled_players = @players.shuffle
         @shuffled_players.each_with_index do |player, i|
             @shuffled_players[i].target = @shuffled_players[(i+1)%4]
-            puts("#{@shuffled_players[i].name} : #{@shuffled_players[i].target.name}")
+            # puts("#{@shuffled_players[i].name} : #{@shuffled_players[i].target.name}")
         end
+        sleep(1)
     end
 
     def start()
         #手持ちのペアカードを捨てる処理
+        puts ""
+        puts "ペアのカードを捨てています。"
         @shuffled_players.each do |player|
-            p '################'
             player.cards.each_with_index do |card, i|     
-                p '-----------'  
-                p card.number
                 next if card.place == 'table'
-
                 card_num_array = player.cards[(i+1)..-1].map(&:number)
-                p card_num_array
                 if pear_index = card_num_array.find_index(card.number)
-                    p pear_index
                     card.place = 'table'
                     player.cards[i + pear_index].place = 'table'
                 end
-
             end
         end
+        sleep(1)
 
         turn = 1
         remaining_player = 4
         @shuffled_players.map{|player| player.rank = 4}
 
+        ready = 'n'
+        while ready != 'y'
+            puts ""
+            puts "ゲームを始めます。準備はいいですか？(y/n)"
+            ready = $stdin.gets.chomp!
+        end
+
+        puts ""
+        puts "##############################"
+        puts "Game Start!"
+        puts "##############################"
+        sleep(1)
+
         while remaining_player > 1 do
+            puts ""
+            puts "##############################"
             puts "#{turn}ターン目"
+            puts "##############################"
+
             @shuffled_players.each_with_index do |player, i|
-                puts"ランキング:#{player.rank}"
                 next if player.rank < 4
 
                 active_player = player
